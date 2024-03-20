@@ -25,9 +25,9 @@ from PIL import Image, ImageDraw
 os.environ['XDG_CACHE_HOME'] = '/home/msds2023/jlegara/.cache'
 os.environ['HUGGINGFACE_HUB_CACHE'] = '/home/msds2023/jlegara/.cache'
 
-scene = 'videos/output1.avi'
+# scene = 'videos/output1.avi'
 
-def video_capture():
+def video_capture(scene):
     
     # Open the video file
     video_capture = cv2.VideoCapture(scene)
@@ -160,22 +160,22 @@ def create_combined_image(face, class_probabilities):
 
     # Create a figure with 2 subplots: one for the
     # face image, one for the barplot
-    fig, axs = plt.subplots(1, 2, figsize=(15, 6))
+    fig, axs = plt.subplots(figsize=(15, 6))
 
     # Display face on the left subplot
-    axs[0].imshow(np.array(face))
-    axs[0].axis('off')
+    # axs[0].imshow(np.array(face))
+    # axs[0].axis('off')
 
     # Create a barplot of the emotion probabilities
     # on the right subplot
-    sns.barplot(ax=axs[1],
+    sns.barplot(ax=axs,
                 y=list(class_probabilities.keys()),
                 x=[prob * 100 for prob in class_probabilities.values()],
                 palette=palette,
                 orient='h')
-    axs[1].set_xlabel('Probability (%)')
-    axs[1].set_title('Emotion Probabilities')
-    axs[1].set_xlim([0, 100])  # Set x-axis limits
+    axs.set_xlabel('Probability (%)')
+    axs.set_title('Emotion Probabilities')
+    axs.set_xlim([0, 100])  # Set x-axis limits
 
     # Convert the figure to a numpy array
     canvas = FigureCanvas(fig)
@@ -185,20 +185,24 @@ def create_combined_image(face, class_probabilities):
 
     plt.close(fig)
     # print(img)
-    
     return img
 
-def reduced_video():
-    video_data,_ = video_capture()
+def reduced_videos(scene):
+    video_data,_ = video_capture(scene)
     skips = 2
     reduced_video = []
 
     for i in tqdm(range(0, len(video_data), skips)):
         reduced_video.append(video_data[i])
         
-    # Define a list of emotions
-    emotions = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
+    return reduced_video
 
+def proba(scene):
+    reduced_video = reduced_videos(scene)
+    
+     # Define a list of emotions
+    emotions = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
+    
     # List to hold the combined images
     combined_images = []
 
@@ -228,25 +232,43 @@ def reduced_video():
 
         # Append class probabilities to the list
         all_class_probabilities.append(class_probabilities)
-            
+    
+    # print(all_class_probabilities)
     return combined_images
 
-def plot():
-    combined_images = reduced_video()
-    skips = 2
-    _,vid_fps = video_capture()
-    # Convert list of images to video clip
-    clip_with_plot = ImageSequenceClip(combined_images,
-                                    fps=vid_fps/skips)  # Choose the frame rate (fps) according to your requirement
 
-    # Write the video to a file with a specific frame rate
-    clip_with_plot.write_videofile("videos/output_video.mp4", fps=vid_fps/skips)
-
-    # Display the clip
-    # clip_with_plot.ipython_display(width=700,maxduration=120)
+# def output():
+#     prob = reduced_video()
+#     output_str = prob
     
-    print(clip_with_plot)
+#     # Find the index of the first '{' character
+#     # start_index = output_str.find('{')
+
+#     # # Extract the substring starting from '{' to the end
+#     # dict_str = output_str[start_index:]
+
+#     # # Convert the extracted string to a dictionary
+#     # output_dict = eval(dict_str)
+
+#     print(output_str[0])
+
+# def plot():
+#     combined_images = reduced_video()
+#     skips = 2
+#     _,vid_fps = video_capture()
+#     # Convert list of images to video clip
+#     clip_with_plot = ImageSequenceClip(combined_images,
+#                                     fps=vid_fps/skips)  # Choose the frame rate (fps) according to your requirement
+
+#     # Write the video to a file with a specific frame rate
+#     clip_with_plot.write_videofile("videos/output_video.mp4", fps=vid_fps/skips)
+
+#     # Display the clip
+#     # clip_with_plot.ipython_display(width=700,maxduration=120)
+    
+#     print(clip_with_plot)
 
 
-if __name__== '__main__':
-    plot()
+# if __name__== '__main__':
+#     scene = 'videos/output1.avi'
+#     proba(scene)
